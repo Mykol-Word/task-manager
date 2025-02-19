@@ -5,6 +5,30 @@
 
 using namespace std;
 
+void clearConsole() {
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    COORD coordScreen = { 0, 0 };    // Home position for cursor
+    DWORD cCharsWritten;
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    DWORD dwConSize;
+
+    // Get the number of character cells in the current buffer.
+    if (!GetConsoleScreenBufferInfo(hConsole, &csbi)) {
+        return;
+    }
+    dwConSize = csbi.dwSize.X * csbi.dwSize.Y;
+
+    // Fill the entire screen with blanks.
+    FillConsoleOutputCharacter(hConsole, TEXT(' '), dwConSize, coordScreen, &cCharsWritten);
+
+    // Get the current text attribute.
+    GetConsoleScreenBufferInfo(hConsole, &csbi);
+
+    // Reset text attributes and move the cursor home.
+    FillConsoleOutputAttribute(hConsole, csbi.wAttributes, dwConSize, coordScreen, &cCharsWritten);
+    SetConsoleCursorPosition(hConsole, coordScreen);
+}
+
 //Sort of like a task-list repl
 int main()
 {
@@ -23,7 +47,7 @@ int main()
         string new_task;
         getline(cin, new_task);
 
-        printf("\033c");
+        clearConsole();
 
         task_out.open("tasks.txt", fstream::app);
         int task_length = new_task.length();
@@ -35,9 +59,9 @@ int main()
         if (task_in.is_open())
         {
             char current_char;
-            while(task_in)
+            while(task_in.get(current_char))
             {
-                current_char = task_in.get();
+                if(task_in.eof()) break;
                 cout << current_char;
             }
         }
