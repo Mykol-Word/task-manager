@@ -3,11 +3,13 @@
 
 Task::Task()
 {
-    t_task = "! Unassigned Task Text !";
-    t_due = "! Unassigned Due Date !";
-    t_status = Status::IN_PROGRESS;
+    t_task = "";
+    t_due = "";
+    t_status = 1; // In progress by default
+    t_ID = -1;
 }
 
+//Obsolete but keeping for debug
 std::string Task::GetPrintString()
 {
     return
@@ -16,6 +18,14 @@ std::string Task::GetPrintString()
         + t_task + "\n" 
         + "------------------------------------\n"
         + "Due: " + t_due + "\n"
-        + "Status: " + std::to_string(static_cast<int>(t_status))
+        + "Status: " + std::to_string(t_status)
+    );
+}
+
+std::string Task::GetStoreString()
+{
+    return
+    (
+        "//" + t_task + "|" + t_due + "|" + std::to_string(t_status)
     );
 }
