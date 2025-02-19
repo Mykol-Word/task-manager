@@ -3,6 +3,8 @@
 #include <windows.h>
 #include <string> 
 
+#include "../inc/task.h"
+
 using namespace std;
 
 void clearConsole() {
@@ -40,18 +42,29 @@ int main()
 
     while(true)
     {
+        string filler_string;
+        Task* new_task = new Task();
+
+        //Task
         SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_INTENSITY);
         cout << "Add a task: ";
         SetConsoleTextAttribute(hConsole, 15);
 
-        string new_task;
-        getline(cin, new_task);
+        getline(cin, filler_string);
+        new_task->t_task = filler_string;
+        
+        //Due date
+        SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_INTENSITY);
+        cout << "Add a due date: ";
+        SetConsoleTextAttribute(hConsole, 15);
+
+        getline(cin, filler_string);
+        new_task->t_due = filler_string;
 
         clearConsole();
 
         task_out.open("tasks.txt", fstream::app);
-        int task_length = new_task.length();
-        task_out << new_task;
+        task_out << new_task->GetPrintString();
         task_out << endl;
         task_out.close();
 
