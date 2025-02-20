@@ -94,31 +94,6 @@ bool parse_tasks(vector<Task>& task_list, int& task_list_length, ifstream& task_
     return 0;
 }
 
-//Clears console, courtesy of ChatGPT
-void clearConsole(HANDLE& hConsole) {
-    hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    COORD coordScreen = { 0, 0 };    // Home position for cursor
-    DWORD cCharsWritten;
-    CONSOLE_SCREEN_BUFFER_INFO csbi;
-    DWORD dwConSize;
-
-    // Get the number of character cells in the current buffer.
-    if (!GetConsoleScreenBufferInfo(hConsole, &csbi)) {
-        return;
-    }
-    dwConSize = csbi.dwSize.X * csbi.dwSize.Y;
-
-    // Fill the entire screen with blanks.
-    FillConsoleOutputCharacter(hConsole, TEXT(' '), dwConSize, coordScreen, &cCharsWritten);
-
-    // Get the current text attribute.
-    GetConsoleScreenBufferInfo(hConsole, &csbi);
-
-    // Reset text attributes and move the cursor home.
-    FillConsoleOutputAttribute(hConsole, csbi.wAttributes, dwConSize, coordScreen, &cCharsWritten);
-    SetConsoleCursorPosition(hConsole, coordScreen);
-}
-
 //Print tasks from task_list with pretty colors
 void print_tasks(vector<Task>& task_list, HANDLE& hConsole)
 {
@@ -154,4 +129,13 @@ void print_tasks(vector<Task>& task_list, HANDLE& hConsole)
         cout << "Status: " << std::to_string(task.t_status) << endl;
         cout << endl;
     }
+}
+
+void print_error(string err_message, int fatal)
+{
+    cerr << err_message << endl;
+    if(fatal)
+        while(true);
+    string dummy_line = "";
+    getline(cin, dummy_line);
 }
