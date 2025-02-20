@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "../inc/task.h"
+#include "../inc/utils.h"
 
 using namespace std;
 
@@ -15,159 +16,12 @@ ifstream task_in;
 ofstream task_out;
 HANDLE  hConsole;
 
-//Parses tasks from tasks.txt file in directory
-bool parse_tasks()
-{
-    task_in.open("tasks.txt");
-
-    //Progress tracker: 4 when done
-    int progress_tracker = 0;
-
-    if (task_in.is_open())
-    {
-        char current_char;
-        Task new_task;
-        while(task_in.get(current_char))
-        {
-            switch(progress_tracker)
-            {
-                case 0: // Nothing found yet, check for "/" opening tag
-                    if(current_char == '/')
-                        progress_tracker++;
-                    break;
-                case 1: // One open tag found, look for another "/"
-                    if(current_char == '/')
-                    {
-                        new_task = *(new Task()); // Create new task since we'll use it now
-                        progress_tracker++;
-                    }
-                    else
-                    {
-                        cerr << "Improper task opening formatting." << endl;
-                        return 1;
-                    }
-                    break;
-                case 2: // Add non "|" chars to new_task t_task, if "|" go to due by phase
-                    if(current_char == '|')
-                    {
-                        progress_tracker++;
-                        break;
-                    }
-                    new_task.t_task += current_char;
-                    break;
-                case 3: // Add non "|" chars to new_task t_due, if "|" go to status phase
-                    if(current_char == '|')
-                    {
-                        progress_tracker++;
-                        break;
-                    }
-                    new_task.t_due += current_char;
-                    break;
-                case 4: //Add status to new_task t_status and go to closing tag phase
-                    switch(current_char)
-                    {
-                        case '0':
-                            new_task.t_status = 0;
-                            break;
-                        case '1':
-                            new_task.t_status = 1;
-                            break;
-                        case '2':
-                            new_task.t_status = 2;
-                            break;
-                        default:
-                            cerr << "Improper task status formatting." << endl;
-                            return 1;
-                    }
-                    task_list_length += 1;
-                    new_task.t_ID = task_list_length;
-
-                    task_list.push_back(new_task);
-                    progress_tracker = 0;
-                    break;
-            }
-        }
-    }
-    task_in.close();
-
-    if(progress_tracker != 0)
-    {
-        cerr << "Last task is incomplete" << endl;
-        return 1;
-    }
-
-    //Success!
-    return 0;
-}
-
-//Clears console, courtesy of ChatGPT
-void clearConsole() {
-    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    COORD coordScreen = { 0, 0 };    // Home position for cursor
-    DWORD cCharsWritten;
-    CONSOLE_SCREEN_BUFFER_INFO csbi;
-    DWORD dwConSize;
-
-    // Get the number of character cells in the current buffer.
-    if (!GetConsoleScreenBufferInfo(hConsole, &csbi)) {
-        return;
-    }
-    dwConSize = csbi.dwSize.X * csbi.dwSize.Y;
-
-    // Fill the entire screen with blanks.
-    FillConsoleOutputCharacter(hConsole, TEXT(' '), dwConSize, coordScreen, &cCharsWritten);
-
-    // Get the current text attribute.
-    GetConsoleScreenBufferInfo(hConsole, &csbi);
-
-    // Reset text attributes and move the cursor home.
-    FillConsoleOutputAttribute(hConsole, csbi.wAttributes, dwConSize, coordScreen, &cCharsWritten);
-    SetConsoleCursorPosition(hConsole, coordScreen);
-}
-
-//Print tasks from task_list with pretty colors
-void print_tasks()
-{
-    // Ugly :(
-    for(Task task : task_list)
-    {
-        SetConsoleTextAttribute(hConsole, 9); // Blue
-        cout << "==========================================" << endl;
-        cout << task.t_ID << endl;
-        SetConsoleTextAttribute(hConsole, 15); // White
-        cout << task.t_task << endl;
-        SetConsoleTextAttribute(hConsole, 11); // Light blue
-        cout << " ----------------------------------------" << endl;
-        SetConsoleTextAttribute(hConsole, 8); // Gray
-        cout << "Due: ";
-        SetConsoleTextAttribute(hConsole, 15); // White
-        cout << task.t_due << endl;
-        SetConsoleTextAttribute(hConsole, 8); // Gray
-        SetConsoleTextAttribute(hConsole, 15); // White
-        int status = static_cast<int>(task.t_status);
-        switch (status)
-        {
-            case 0:
-                SetConsoleTextAttribute(hConsole, 12); // Red
-                break;
-            case 1:
-                SetConsoleTextAttribute(hConsole, 14); // Yellow
-                break;
-            case 2:
-                SetConsoleTextAttribute(hConsole, 10); // Green
-                break;
-        }
-        cout << "Status: " << std::to_string(task.t_status) << endl;
-        cout << endl;
-    }
-}
-
 //Sort of like a task-list repl
 int main()
 {
     hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
-    if(parse_tasks())
+    if(parse_tasks(task_list, task_list_length, task_in, task_out, hConsole))
     {
         cerr << "Failed to parse tasks. Exit program";
         while(true);
@@ -175,38 +29,106 @@ int main()
 
     while(true)
     {
-        clearConsole();
-        print_tasks();
-    
+        clearConsole(hConsole);
+        print_tasks(task_list, hConsole);
 
-        string filler_string;
-        Task new_task;
-
-        //Task
-        SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_INTENSITY);
+        SetConsoleTextAttribute(hConsole, 15); // White
+        
         cout << "- - - - - - - - - - - - - - - - - - - - - -" << endl;
-        cout << "Add a task: ";
-        SetConsoleTextAttribute(hConsole, 15);
-
-        getline(cin, filler_string);
-        new_task.t_task = filler_string;
+        cout << "[a] to add Task, [d] to delete task, [c] to change task status:" << endl;
         
-        //Due date
-        SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_INTENSITY);
-        cout << "Add a due date: ";
-        SetConsoleTextAttribute(hConsole, 15);
+        //Input
+        string input_string;
+        getline(cin, input_string);
 
-        getline(cin, filler_string);
-        new_task.t_due = filler_string;
-        
-        task_list_length += 1;
-        new_task.t_ID = task_list_length;
-        task_list.push_back(new_task);
+        if(input_string == "a") // Add task
+        {
+            Task new_task = *(new Task());
 
-        task_out.open("tasks.txt", fstream::app);
-        task_out << new_task.GetStoreString();
-        task_out << endl;
-        task_out.close();
+            cout << "Task text: ";
+            getline(cin, input_string);
+            new_task.t_task = input_string;
+
+            cout << "Task deadline: ";
+            getline(cin, input_string);
+            new_task.t_due = input_string;
+
+            task_list_length += 1;
+            new_task.t_ID = task_list_length;
+            task_list.push_back(new_task);
+
+            task_out.open("tasks.txt", fstream::app);
+            task_out << new_task.GetStoreString();
+            task_out << endl;
+            task_out.close();
+        }
+        else if (input_string == "d")
+        {
+            cout << "Input the task ID of the task you want to delete: ";
+            getline(cin, input_string);
+            int delete_line = stoi(input_string) - 1;
+            if(delete_line >= task_list_length || delete_line < 0)
+            {
+                cout << "Invalid task ID. Press enter to continue.";
+                getline(cin, input_string);
+                continue;
+            }
+            
+            task_in.open("tasks.txt");
+            
+            char current_char;
+            int current_line = 0;
+            string new_task_list = "";
+
+            while (task_in.get(current_char))
+            {
+                if(current_line != delete_line)
+                    new_task_list += current_char;
+                if(current_char == '\n')
+                    current_line += 1;
+                
+            }
+            task_in.close();
+
+            task_out.open("tasks.txt");
+            task_out << new_task_list;
+            task_out.close();
+            task_list_length = 0;
+
+            task_list.clear();
+            if(parse_tasks(task_list, task_list_length, task_in, task_out, hConsole))
+            {
+                cerr << "Failed to parse tasks. Exit program";
+                while(true);
+            }
+        }
+        else if (input_string == "c")
+        {
+            cout << "Input the task ID of the task you want to change the status of: ";
+            getline(cin, input_string);
+            int task_id = stoi(input_string) - 1;
+            if(task_id >= task_list_length || task_id < 0)
+            {
+                cout << "Invalid task ID. Press enter to continue.";
+                getline(cin, input_string);
+                continue;
+            }
+            cout << "Input [0] for failed, [1] for in-progress, or [2] for completed: ";
+            getline(cin, input_string);
+            int status_input = stoi(input_string);
+            if(status_input != 0 && status_input != 1 && status_input != 2)
+            {
+                cout << "Invalid status. Press enter to continue.";
+                getline(cin, input_string);
+                continue;
+            }
+            task_list[task_id].t_status = status_input;
+        }
+        else
+        {
+            cout << "Invalid command. Press enter to continue.";
+            getline(cin, input_string);
+        }
     }
 }
 
