@@ -21,6 +21,7 @@ bool parse_tasks(vector<Task>& task_list, int& task_list_length, ifstream& task_
     {
         char current_char;
         Task new_task;
+
         while(task_in.get(current_char))
         {
             switch(progress_tracker)
@@ -29,19 +30,18 @@ bool parse_tasks(vector<Task>& task_list, int& task_list_length, ifstream& task_
                     if(current_char == '/')
                         progress_tracker++;
                     break;
+
                 case 1: // One open tag found, look for another "/"
                     if(current_char == '/')
                     {
-                        new_task = *(new Task()); // Create new task since we'll use it now
+                        new_task = *(new Task());
                         progress_tracker++;
                     }
                     else
-                    {
-                        cerr << "Improper task opening formatting." << endl;
-                        return 1;
-                    }
+                        { print_error("Improper task opening formatting."); return 1; }
                     break;
-                case 2: // Add non "|" chars to new_task t_task, if "|" go to due by phase
+
+                case 2: // Add non "|" chars to new_task t_task, if "|" go to next phase
                     if(current_char == '|')
                     {
                         progress_tracker++;
@@ -49,7 +49,8 @@ bool parse_tasks(vector<Task>& task_list, int& task_list_length, ifstream& task_
                     }
                     new_task.t_task += current_char;
                     break;
-                case 3: // Add non "|" chars to new_task t_due, if "|" go to status phase
+
+                case 3: // Add non "|" chars to new_task t_due, if "|" go to next phase
                     if(current_char == '|')
                     {
                         progress_tracker++;
@@ -57,22 +58,27 @@ bool parse_tasks(vector<Task>& task_list, int& task_list_length, ifstream& task_
                     }
                     new_task.t_due += current_char;
                     break;
+
                 case 4: //Add status to new_task t_status and go to closing tag phase
                     switch(current_char)
                     {
                         case '0':
                             new_task.t_status = 0;
                             break;
+
                         case '1':
                             new_task.t_status = 1;
                             break;
+
                         case '2':
                             new_task.t_status = 2;
                             break;
+
                         default:
-                            cerr << "Improper task status formatting." << endl;
+                            print_error("Invalid task status."); 
                             return 1;
                     }
+                    
                     task_list_length += 1;
                     new_task.t_ID = task_list_length;
 
@@ -85,10 +91,7 @@ bool parse_tasks(vector<Task>& task_list, int& task_list_length, ifstream& task_
     task_in.close();
 
     if(progress_tracker != 0)
-    {
-        cerr << "Last task is incomplete" << endl;
-        return 1;
-    }
+        { print_error("Last task is incomplete."); return 1; }
 
     //Success!
     return 0;
