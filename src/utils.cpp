@@ -10,9 +10,9 @@
 using namespace std;
 
 //Parses tasks from tasks.txt file in directory
-bool parse_tasks(vector<Task>& task_list, int& task_list_length, ifstream& task_in, ofstream& task_out, HANDLE& hConsole)
+bool parse_tasks(vector<Task>& task_list, int& task_list_length, ifstream& task_in, ofstream& task_out, HANDLE& hConsole, string file_name)
 {
-    task_in.open("tasks.txt");
+    task_in.open(file_name);
 
     //Progress tracker: 4 when done
     int progress_tracker = 0;
@@ -130,6 +130,7 @@ void print_tasks(vector<Task>& task_list, HANDLE& hConsole)
                 break;
         }
         cout << "Status: " << std::to_string(task.t_status) << endl;
+        SetConsoleTextAttribute(hConsole, 15); // White
         cout << endl;
     }
 }

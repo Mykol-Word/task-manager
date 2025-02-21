@@ -23,7 +23,7 @@ int main()
     hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
     //Parse tasks. Freeze program if fails.
-    if(parse_tasks(task_list, task_list_length, task_in, task_out, hConsole))
+    if(parse_tasks(task_list, task_list_length, task_in, task_out, hConsole, "tasks.txt"))
         print_error("Failed to parse tasks. Exit program", 1);
 
     //main repl
@@ -31,16 +31,15 @@ int main()
     {
         system("cls");
         print_tasks(task_list, hConsole);
-        SetConsoleTextAttribute(hConsole, 15); // White
         
         cout << "- - - - - - - - - - - - - - - - - - - - - -" << endl;
-        cout << "[a] to add Task, [d] to delete task, [da] to delete + archive a task, [c] to change task status:" << endl;
+        cout << "[a] to add Task, [d] to delete task, [da] to delete + archive a task, [c] to change task status, [la] to display archived tasks:" << endl;
         
         //Initial input
         string input_string;
         getline(cin, input_string);
 
-        //Handle input characters
+        //Handle inputs
         if(input_string == "a") // Add new task to task list
         {
             Task new_task = *(new Task());
@@ -72,7 +71,7 @@ int main()
             if(delete_line >= task_list_length || delete_line < 0)
                 { print_error("Invalid task ID. Press enter to continue."); continue; }
 
-            //Add task to task archive and note time if specified by input
+            //Add task to task archive and note time if task should be archived
             if(should_archive)
             {
                 task_out.open("tasks-archive.txt", fstream::app);
@@ -103,7 +102,7 @@ int main()
             //Reparse tasks with new task file
             task_list_length = 0;
             task_list.clear();
-            if(parse_tasks(task_list, task_list_length, task_in, task_out, hConsole))
+            if(parse_tasks(task_list, task_list_length, task_in, task_out, hConsole, "tasks.txt"))
                 print_error("Failed to parse tasks. Exit program", 1);
         }
         else if (input_string == "c") //Change task completion status
@@ -123,6 +122,26 @@ int main()
                 { print_error("Invalid status. Press enter to continue."); continue; }
 
             task_list[task_id].t_status = status_input;
+        }
+        else if (input_string == "la") // List archivef tasks
+        {
+            //Fill task list with archive tasks
+            task_list_length = 0;
+            task_list.clear();
+            if(parse_tasks(task_list, task_list_length, task_in, task_out, hConsole, "tasks-archive.txt"))
+                print_error("Failed to parse tasks. Exit program", 1);
+            
+            system("cls");
+            print_tasks(task_list, hConsole);
+            cout << "- - - - - - - - - - - - - - - - - - - - - -" << endl;
+            cout << "Press enter to return to the normal task menu:";
+            getline(cin, input_string);
+
+            //refill task list with actual tasks
+            task_list_length = 0;
+            task_list.clear();
+            if(parse_tasks(task_list, task_list_length, task_in, task_out, hConsole, "tasks.txt"))
+                print_error("Failed to parse tasks. Exit program", 1);
         }
         else // Invalid input
         {
