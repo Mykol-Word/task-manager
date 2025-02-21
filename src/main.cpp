@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <cstdlib>
+#include <time.h>
 
 #include "../inc/task.h"
 #include "../inc/utils.h"
@@ -68,6 +69,12 @@ int main()
             int delete_line = stoi(input_string) - 1;
             if(delete_line >= task_list_length || delete_line < 0)
                 { print_error("Invalid task ID. Press enter to continue."); continue; }
+
+            //Add task to task archive and note time
+            task_out.open("tasks-archive.txt", fstream::app);
+            time_t time_deleted = time(NULL);
+            task_out << task_list[delete_line].GetStoreString() << "|" << ctime(&time_deleted) << endl;
+            task_out.close();
             
             char current_char;
             int current_line = 0;
