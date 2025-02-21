@@ -143,3 +143,19 @@ void print_error(string err_message, int fatal)
     string dummy_line = "";
     getline(cin, dummy_line);
 }
+
+void print_help_message()
+{
+    cout << endl;
+    cout << "Below is a list of all supported commands." << endl;
+    cout << "Brackets [] encapsulate the commands for distinguishability." << endl;
+    cout << "- - - - - - - - - - - - - - - - - - - - - -" << endl;
+    cout << "[a] ---- Add a task to your task list." << endl;
+    cout << "[d] ---- Delete a task permanently from your task list." << endl;
+    cout << "[da] --- Delete a task and archive it in the task archive." << endl;
+    cout << "[c] ---- Change the status of an existing task." << endl;
+    cout << "[la] --- List all archived tasks." << endl;
+    cout << "[help] - List all supported commands." << endl;
+    cout << "- - - - - - - - - - - - - - - - - - - - - -" << endl;
+    cout << "Press enter to return to continue." << endl;
+}

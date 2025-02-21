@@ -33,7 +33,7 @@ int main()
         print_tasks(task_list, hConsole);
         
         cout << "- - - - - - - - - - - - - - - - - - - - - -" << endl;
-        cout << "[a] to add Task, [d] to delete task, [da] to delete + archive a task, [c] to change task status, [la] to display archived tasks:" << endl;
+        cout << "Type [help] for the list of all available commands:" << endl;
         
         //Initial input
         string input_string;
@@ -123,7 +123,7 @@ int main()
 
             task_list[task_id].t_status = status_input;
         }
-        else if (input_string == "la") // List archivef tasks
+        else if (input_string == "la") // List archived tasks
         {
             //Fill task list with archive tasks
             task_list_length = 0;
@@ -134,7 +134,7 @@ int main()
             system("cls");
             print_tasks(task_list, hConsole);
             cout << "- - - - - - - - - - - - - - - - - - - - - -" << endl;
-            cout << "Press enter to return to the normal task menu:";
+            cout << "Press enter to return to the normal task menu:" << endl;
             getline(cin, input_string);
 
             //refill task list with actual tasks
@@ -143,9 +143,14 @@ int main()
             if(parse_tasks(task_list, task_list_length, task_in, task_out, hConsole, "tasks.txt"))
                 print_error("Failed to parse tasks. Exit program", 1);
         }
+        else if (input_string == "help") // List all supported commands
+        {
+            print_help_message();
+            getline(cin, input_string);
+        }
         else // Invalid input
         {
-            cout << "Invalid command. Press enter to continue.";
+            cout << "Invalid command. Press enter to continue." << endl;
             getline(cin, input_string);
         }
     }
