@@ -117,19 +117,23 @@ void print_tasks(vector<Task>& task_list, HANDLE& hConsole)
         SetConsoleTextAttribute(hConsole, 8); // Gray
         SetConsoleTextAttribute(hConsole, 15); // White
         int status = static_cast<int>(task.t_status);
+        string status_string = "";
         switch (status)
         {
             case 0:
                 SetConsoleTextAttribute(hConsole, 12); // Red
+                status_string = "FAILED (0)";
                 break;
             case 1:
                 SetConsoleTextAttribute(hConsole, 14); // Yellow
+                status_string = "IN PROGRESS (1)";
                 break;
             case 2:
                 SetConsoleTextAttribute(hConsole, 10); // Green
+                status_string = "COMPLETED (2)";
                 break;
         }
-        cout << "Status: " << std::to_string(task.t_status) << endl;
+        cout << "Status: " << status_string << endl;
         SetConsoleTextAttribute(hConsole, 15); // White
         cout << endl;
     }
