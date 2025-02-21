@@ -4,7 +4,7 @@ A simple terminal task manager. It was designed to be used as a windows shortcut
 
 ### App Setup:
 
-The app requires a file named "tasks.txt" to read and write to. I've included a file called "tasks-template.txt" which you can rename appropriately.
+The app requires a file named "tasks.txt" to read and write tasks to. It also requires a file named "tasks-archive.txt" to archive tasks. I've included files called "tasks-template.txt" and "tasks-archive-template.txt" which you can rename appropriately.
 
 ### Shortcut Setup:
 
