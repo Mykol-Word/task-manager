@@ -34,7 +34,7 @@ int main()
         SetConsoleTextAttribute(hConsole, 15); // White
         
         cout << "- - - - - - - - - - - - - - - - - - - - - -" << endl;
-        cout << "[a] to add Task, [d] to delete task, [c] to change task status:" << endl;
+        cout << "[a] to add Task, [d] to delete task, [da] to delete + archive a task, [c] to change task status:" << endl;
         
         //Initial input
         string input_string;
@@ -61,8 +61,10 @@ int main()
             task_out << new_task.GetStoreString() << endl;
             task_out.close();
         }
-        else if (input_string == "d") // Delete task from the task list
+        else if (input_string == "da" || input_string == "d") // Delete task from the task list
         {
+            bool should_archive = (input_string == "da");
+
             cout << "Input the task ID of the task you want to delete: ";
             getline(cin, input_string);
 
@@ -70,11 +72,14 @@ int main()
             if(delete_line >= task_list_length || delete_line < 0)
                 { print_error("Invalid task ID. Press enter to continue."); continue; }
 
-            //Add task to task archive and note time
-            task_out.open("tasks-archive.txt", fstream::app);
-            time_t time_deleted = time(NULL);
-            task_out << task_list[delete_line].GetStoreString() << "|" << ctime(&time_deleted) << endl;
-            task_out.close();
+            //Add task to task archive and note time if specified by input
+            if(should_archive)
+            {
+                task_out.open("tasks-archive.txt", fstream::app);
+                time_t time_deleted = time(NULL);
+                task_out << task_list[delete_line].GetStoreString() << "|" << ctime(&time_deleted);
+                task_out.close();
+            }
             
             char current_char;
             int current_line = 0;
