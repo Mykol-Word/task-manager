@@ -8,6 +8,6 @@ The app requires a file named "tasks.txt" to read and write tasks to. It also re
 
 ### Shortcut Setup:
 
-Generate the executable from the repository however you'd like. I use: `g++ src/*.cpp -o task-manager.exe`
+Generate the executable from the repository by running `make`. 
 
 Right click the executable in file explorer or the desktop and select "Pin to Start." Navigate to your start menu path and right click the executable's shortcut. Assign the global shortcut keys to whatever you'd like and apply the change. Now you can open the app anytime on your computer.
