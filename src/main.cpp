@@ -41,7 +41,12 @@ int main()
         
         //Initial input
         string input_string;
-        getline(cin, input_string);
+        if(!getline(cin, input_string))
+        {
+            cin.clear();
+            cin.ignore(10000, '\n');
+            continue;
+        }
 
         //Handle inputs
         if(input_string == "a") // Add new task to task list
@@ -187,7 +192,11 @@ int main()
         else // Invalid input
         {
             cout << "Invalid command. Press enter to continue." << endl;
-            getline(cin, input_string);
+            if(!getline(cin, input_string))
+            {
+                cin.clear();
+                cin.ignore(10000, '\n');
+            }
         }
     }
 }
