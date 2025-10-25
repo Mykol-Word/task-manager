@@ -29,7 +29,11 @@ int main()
     //main repl
     while(true)
     {
+#ifdef _WIN32
         system("cls");
+#else
+        system("clear");
+#endif
         print_tasks(task_list, hConsole);
         
         cout << "- - - - - - - - - - - - - - - - - - - - - -" << endl;
@@ -158,8 +162,12 @@ int main()
             task_list.clear();
             if(parse_tasks(task_list, task_list_length, task_in, task_out, hConsole, "tasks-archive.txt"))
                 print_error("Failed to parse tasks. Exit program", 1);
-            
+
+#ifdef _WIN32
             system("cls");
+#else
+            system("clear");
+#endif
             print_tasks(task_list, hConsole);
             cout << "- - - - - - - - - - - - - - - - - - - - - -" << endl;
             cout << "Press enter to return to the normal task menu:" << endl;
