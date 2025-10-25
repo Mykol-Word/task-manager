@@ -34,7 +34,7 @@ bool parse_tasks(vector<Task>& task_list, int& task_list_length, ifstream& task_
                 case 1: // One open tag found, look for another "/"
                     if(current_char == '/')
                     {
-                        new_task = *(new Task());
+                        new_task = Task();
                         progress_tracker++;
                     }
                     else
@@ -143,7 +143,7 @@ void print_error(string err_message, int fatal)
 {
     cerr << err_message << endl;
     if(fatal)
-        while(true);
+        exit(1);
     string dummy_line = "";
     getline(cin, dummy_line);
 }

@@ -42,7 +42,7 @@ int main()
         //Handle inputs
         if(input_string == "a") // Add new task to task list
         {
-            Task new_task = *(new Task());
+            Task new_task;
 
             cout << "Task text: ";
             getline(cin, input_string);
@@ -67,7 +67,13 @@ int main()
             cout << "Input the task ID of the task you want to delete: ";
             getline(cin, input_string);
 
-            int delete_line = stoi(input_string) - 1;
+            int delete_line;
+            try {
+                delete_line = stoi(input_string) - 1;
+            } catch (...) {
+                print_error("Invalid input. Press enter to continue.");
+                continue;
+            }
             if(delete_line >= task_list_length || delete_line < 0)
                 { print_error("Invalid task ID. Press enter to continue."); continue; }
 
@@ -76,7 +82,10 @@ int main()
             {
                 task_out.open("tasks-archive.txt", fstream::app);
                 time_t time_deleted = time(NULL);
-                task_out << task_list[delete_line].GetStoreString() << "|" << ctime(&time_deleted);
+                string time_str = ctime(&time_deleted);
+                if(!time_str.empty() && time_str.back() == '\n')
+                    time_str.pop_back();
+                task_out << task_list[delete_line].GetStoreString() << "|" << time_str << endl;
                 task_out.close();
             }
             
@@ -110,18 +119,37 @@ int main()
             cout << "Input the task ID of the task you want to change the status of: ";
             getline(cin, input_string);
 
-            int task_id = stoi(input_string) - 1;
+            int task_id;
+            try {
+                task_id = stoi(input_string) - 1;
+            } catch (...) {
+                print_error("Invalid input. Press enter to continue.");
+                continue;
+            }
             if(task_id >= task_list_length || task_id < 0)
                 { print_error("Invalid task ID. Press enter to continue."); continue; }
 
             cout << "Input [0] for failed, [1] for in-progress, or [2] for completed: ";
             getline(cin, input_string);
 
-            int status_input = stoi(input_string);
+            int status_input;
+            try {
+                status_input = stoi(input_string);
+            } catch (...) {
+                print_error("Invalid input. Press enter to continue.");
+                continue;
+            }
             if(status_input != 0 && status_input != 1 && status_input != 2)
                 { print_error("Invalid status. Press enter to continue."); continue; }
 
             task_list[task_id].t_status = status_input;
+
+            task_out.open("tasks.txt");
+            for(int i = 0; i < task_list.size(); i++)
+            {
+                task_out << task_list[i].GetStoreString() << endl;
+            }
+            task_out.close();
         }
         else if (input_string == "la") // List archived tasks
         {
