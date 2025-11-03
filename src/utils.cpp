@@ -14,7 +14,7 @@ bool parse_tasks(vector<Task>& task_list, int& task_list_length, ifstream& task_
 {
     task_in.open(file_name);
 
-    //Progress tracker: 4 when done
+    //Progress tracker: 5 when done
     int progress_tracker = 0;
 
     if (task_in.is_open())
@@ -59,7 +59,7 @@ bool parse_tasks(vector<Task>& task_list, int& task_list_length, ifstream& task_
                     new_task.t_due += current_char;
                     break;
 
-                case 4: //Add status to new_task t_status and go to closing tag phase
+                case 4: //Add status to new_task t_status and go to progress phase
                     switch(current_char)
                     {
                         case '0':
@@ -75,15 +75,35 @@ bool parse_tasks(vector<Task>& task_list, int& task_list_length, ifstream& task_
                             break;
 
                         default:
-                            print_error("Invalid task status."); 
+                            print_error("Invalid task status.");
                             return 1;
                     }
-                    
-                    task_list_length += 1;
-                    new_task.t_ID = task_list_length;
+                    progress_tracker++;
+                    break;
 
-                    task_list.push_back(new_task);
-                    progress_tracker = 0;
+                case 5: //Add progress to new_task t_progress and finalize task
+                    if(current_char == '|')
+                    {
+                        break; // Skip the delimiter after status
+                    }
+                    if(current_char == '\n')
+                    {
+                        task_list_length += 1;
+                        new_task.t_ID = task_list_length;
+
+                        task_list.push_back(new_task);
+                        progress_tracker = 0;
+                        break;
+                    }
+                    if(current_char >= '0' && current_char <= '9')
+                    {
+                        new_task.t_progress = new_task.t_progress * 10 + (current_char - '0');
+                    }
+                    else
+                    {
+                        print_error("Invalid task progress.");
+                        return 1;
+                    }
                     break;
             }
         }
@@ -104,12 +124,12 @@ void print_tasks(vector<Task>& task_list, HANDLE& hConsole)
     for(Task task : task_list)
     {
         SetConsoleTextAttribute(hConsole, 9); // Blue
-        cout << "==========================================" << endl;
+        cout << "==================================================" << endl;
         cout << task.t_ID << endl;
         SetConsoleTextAttribute(hConsole, 15); // White
         cout << task.t_task << endl;
         SetConsoleTextAttribute(hConsole, 11); // Light blue
-        cout << " ----------------------------------------" << endl;
+        cout << " ------------------------------------------------" << endl;
         SetConsoleTextAttribute(hConsole, 8); // Gray
         cout << "Due: ";
         SetConsoleTextAttribute(hConsole, 15); // White
@@ -135,6 +155,11 @@ void print_tasks(vector<Task>& task_list, HANDLE& hConsole)
         }
         cout << "Status: " << status_string << endl;
         SetConsoleTextAttribute(hConsole, 15); // White
+        int filled = (task.t_progress * 50) / 100;
+        for(int i = 0; i < filled; i++)
+            cout << "\u25A0";
+        for(int i = filled; i < 50; i++)
+            cout << "-";
         cout << endl;
     }
 }
@@ -158,6 +183,7 @@ void print_help_message()
     cout << "[d] ---- Delete a task permanently from your task list." << endl;
     cout << "[da] --- Delete a task and archive it in the task archive." << endl;
     cout << "[c] ---- Change the status of an existing task." << endl;
+    cout << "[p] ---- Change the progress of an existing task." << endl;
     cout << "[la] --- List all archived tasks." << endl;
     cout << "[help] - List all supported commands." << endl;
     cout << "- - - - - - - - - - - - - - - - - - - - - -" << endl;

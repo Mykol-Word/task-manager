@@ -160,6 +160,43 @@ int main()
             }
             task_out.close();
         }
+        else if (input_string == "p") //Change task progress
+        {
+            cout << "Input the task ID of the task you want to change the progress of: ";
+            getline(cin, input_string);
+
+            int task_id;
+            try {
+                task_id = stoi(input_string) - 1;
+            } catch (...) {
+                print_error("Invalid input. Press enter to continue.");
+                continue;
+            }
+            if(task_id >= task_list_length || task_id < 0)
+                { print_error("Invalid task ID. Press enter to continue."); continue; }
+
+            cout << "Input progress (0-100): ";
+            getline(cin, input_string);
+
+            int progress_input;
+            try {
+                progress_input = stoi(input_string);
+            } catch (...) {
+                print_error("Invalid input. Press enter to continue.");
+                continue;
+            }
+            if(progress_input < 0 || progress_input > 100)
+                { print_error("Invalid input. Press enter to continue."); continue; }
+
+            task_list[task_id].t_progress = progress_input;
+
+            task_out.open("tasks.txt");
+            for(int i = 0; i < task_list.size(); i++)
+            {
+                task_out << task_list[i].GetStoreString() << endl;
+            }
+            task_out.close();
+        }
         else if (input_string == "la") // List archived tasks
         {
             //Fill task list with archive tasks

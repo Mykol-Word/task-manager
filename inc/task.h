@@ -9,6 +9,7 @@ class Task
         std::string t_task;
         std::string t_due;
         int t_status;
+        int t_progress;
         int t_ID;
 
         Task();
